@@ -40,10 +40,9 @@ def Apache2log():
                 else:
                     Data.append(log.replace("\n",""))
                     print("No suspicious extension", path)
+                    
             except: # no file extension
                 with open(file_path, "a") as f:
-                    f.write(log)
-                    print("goog!")
                     Data.append(log.replace("\n",""))
     f.close()
 if __name__ == "__main__":
