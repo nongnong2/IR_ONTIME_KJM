@@ -1,7 +1,7 @@
 import subprocess
 import re
 import os
-from regexs_ import ip_regex, Time_regex, Method_regex, Path_regex, Status_regex, DataSize_regex, Suspicious_Extension_regex, Sql_injection_regx, CssAttack_regx
+from regexs_ import Method_regex, Suspicious_Extension_regex, Sql_injection_regx, CssAttack_regx, Str_dot
 
 def check_File(Path, regex, file_path, log):
     check = bool(re.search(regex, Path))
@@ -26,13 +26,19 @@ def Get_StrangeApache2log(log_full_path, write_full_path):
             pass
         else: #New log
             log = str_result + "\n"
-            
             path = log.split(" ")[6]
+            
             Sql_Check = check_File(path, Sql_injection_regx, write_full_path, log)
             Sus_Extension = check_File(path, Suspicious_Extension_regex, write_full_path, log)
             Css_Check = check_File(path, CssAttack_regx, write_full_path, log)
-
+            Dot_Check = re.compile(Str_dot).findall(path)
+            if len(Dot_Check) != 1:
+                with open(write_full_path, "a") as f:
+                    f.write(log)
+                    print(log)
+            else:
+                continue
     f.close()
 if __name__ == "__main__":
-    Get_StrangeApache2log("/var/log/apache2/access.log", "/home/ksm/Desktop/accesslog.txt")
-    Get_StrangeApache2log("/var/log/apache2/error.log", "/home/ksm/Desktop/errorlog.txt")
+    Get_StrangeApache2log("/var/log/apache2/access.log", "/home/investigate/accesslog.txt")
+    Get_StrangeApache2log("/var/log/apache2/error.log", "/home/investigate/errorlog.txt")
