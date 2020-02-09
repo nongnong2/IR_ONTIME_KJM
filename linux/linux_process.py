@@ -1,30 +1,5 @@
 import subprocess
 import re
-from regexs_ import ip_regex, Time_regex, Method_regex, Path_regex, Status_regex, DataSize_regex, Suspicious_Extension_regex
-
-"""
-웹 서버 업로드 공격하거나 DB자체에 공격할 수 있음 
-Web Shell
-1. 웹쉘이 유입될수도 있고
-2. 웹쉘이 이미 존재한 상태일 수도 있음
-
-SQL injection
-Sql injection 관련 대응 - https://dzone.com/articles/how-to-detect-sql-injection-attacks-using-extended
-
-RFI/LFI
-
-1. mysql errolg 활성화 필요
-ps ax | grep mysql
-/var/log/secure
-/var/log/httpd
-/var/log/apache2/access.log(간추릴 필요 있음 )
-
-
-백도어 탐지
-
-crontab 확인 
-/var/spool/cron에 해당 계정명으로 생성되어 있음 
-"""
 
 #check Web, DB services
 def CheckService():
@@ -44,57 +19,38 @@ def CheckService():
 
     return Service_list
 
-def CheckProcessList():
-    subprocess.call('ps -ef', shell=True)
+def CheckProcessList(count):
+    subprocess.call('ps -ef > pslite{}.txt'.format(count), shell=True)
 
-def CheckNetwork():
-    subprocess.call('netstat -an', shell=True)
+def CheckNetwork(count):
+    subprocess.call('netstat -an > netlist{}.txt'.format(count), shell=True)
 
-def CheckSetUID(path):
-    subprocess.call('find {} -perm -4000'.format(path), shell=True)
+def CheckSetUID(count):
+    subprocess.call('find / -perm -4000 > Uid{}.txt'.format(count), shell=True)
 
-def Collectlog(logname): #wtpm, btm, last, xfer, cron, secure, httpd
-    subprocess.call('cp /var/log/{} {}.bin'.format(logname, logname), shell=True)
-    subprocess.call('string {}.bin'.format(logname), shell=True)
+def CollectVarLog(logname, count): #wtmp, btmp, lastlog, xferlog, cron, secure, httpd/access_log, httpd/error_log
+    subprocess.call('cat /var/log/{} > {}/{}_{}.bin'.format(logname, logname, logname, count), shell=True)
+    subprocess.call('string {}/{}_{}.bin'.format(logname, logname, count), shell=True)
 
-def check_FileExtension(Method_, Path_):
-    bool_check = False
-    Extension = bool(re.search(Suspicious_Extension_regex, Path_))
-    if Extension == True:
-        bool_check = True
-    else:
-        bool_check = False
-    return bool_check
-
-def Apache2log():
-    f = open("./access.log", "a")
-    result = subprocess.check_output('cat /var/log/apache2/access.log', shell=True)
-    Data = str(result, "utf-8").split("\n")
-    while True:
-        result = subprocess.check_output('tail -1 /var/log/apache2/access.log', shell=True)
-        str_result = str(result, "utf-8").replace("\n", "")
-        if str_result in Data: #No new log
+def Gethistory():
+    User_list = str(subprocess.check_output('grep /bin/bash /etc/passwd | cut -f1 -d:', shell=True),encoding="utf-8").split('\n')
+    for user in User_list:
+        if user == '':
             pass
+        elif user == 'root':
+            subprocess.call('cat /root/.bash_history > root_history', shell=True)
+        else:
+            subprocess.call('cat /home/{}/.bash_history > {}_history.txt'.format(user, user), shell=True)
 
-        else: #New log
-            log = str_result + "\n"
-            try:
-                method = re.compile(Method_regex).findall(log[1])[0]
-                path = re.compile(Path_regex).findall(log[1].split(" ")[1])[0]
-            except:
-                pass
-            try:
-                check_FileExtension = check_FileExtension(method, path)
-                if check_FileExtension == True:
-                    f.write(log)
-                    print("good!")
-                    f.close()
-                else:
-                    print("No suspicious extension", path)
-            except:
-                print("good!")
-                pass
+def Who():
+    subprocess.call('who -a > who.txt')
+
+def GetNetworkInfo(count):
+    subprocess.call('cat netstat -naop > network_{}'.format(count), shell=True)
+
+def GetProcessInfo(count):
+    subprocess.call('cat ps -ef -naop > process_{}'.format(count), shell=True)
 
 if __name__ == "__main__":
-    file_path = subprocess.call('pwd')
-    Apache2log()
+    
+    
