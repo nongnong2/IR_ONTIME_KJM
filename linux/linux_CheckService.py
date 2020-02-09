@@ -13,16 +13,14 @@ def check_File(Path, regex, file_path, log):
     else:
         return False
 
-def Apache2log():
-    file_path = "./access.log"
-    result = subprocess.check_output('cat /var/log/apache2/access.log', shell=True)
-    # Data= str(result, "utf-8").split("\n")
-    Data_size = os.path.getsize("/var/log/apache2/access.log")
+def Get_StrangeApache2log(log_full_path, write_full_path):
+    result = subprocess.check_output('cat {}'.format(log_full_path), shell=True)
+    Data_size = os.path.getsize(log_full_path)
     while True:
-        Data_size = os.path.getsize("/var/log/apache2/access.log")
-        result = subprocess.check_output('tail -1 /var/log/apache2/access.log', shell=True)
+        Data_size = os.path.getsize(log_full_path)
+        result = subprocess.check_output('tail -1 {}'.format(log_full_path), shell=True)
         str_result = str(result, "utf-8").replace("\n", "")
-        Data_size_compare = os.path.getsize("/var/log/apache2/access.log")
+        Data_size_compare = os.path.getsize(log_full_path)
 
         if Data_size == Data_size_compare: #No new log
             pass
@@ -30,11 +28,11 @@ def Apache2log():
             log = str_result + "\n"
             
             path = log.split(" ")[6]
-            new_Data.append(log) #append new log to list
-            Sql_Check = check_File(path, Sql_injection_regx, file_path, log)
-            Sus_Extension = check_File(path, Suspicious_Extension_regex, file_path, log)
-            Css_Check = check_File(path, CssAttack_regx, file_path, log)
+            Sql_Check = check_File(path, Sql_injection_regx, write_full_path, log)
+            Sus_Extension = check_File(path, Suspicious_Extension_regex, write_full_path, log)
+            Css_Check = check_File(path, CssAttack_regx, write_full_path, log)
 
     f.close()
 if __name__ == "__main__":
-    Apache2log()
+    Get_StrangeApache2log("/var/log/apache2/access.log", "/home/ksm/Desktop/accesslog.txt")
+    Get_StrangeApache2log("/var/log/apache2/error.log", "/home/ksm/Desktop/errorlog.txt")

@@ -2,6 +2,7 @@ import subprocess
 import re
 
 #check Web, DB services
+
 def CheckService():
     Service_list = []
     result = subprocess.check_output('service --status-all|grep +', shell='True')
@@ -19,18 +20,12 @@ def CheckService():
 
     return Service_list
 
-def CheckProcessList(count):
-    subprocess.call('ps -ef > pslite{}.txt'.format(count), shell=True)
-
-def CheckNetwork(count):
-    subprocess.call('netstat -an > netlist{}.txt'.format(count), shell=True)
-
 def CheckSetUID(count):
-    subprocess.call('find / -perm -4000 > Uid{}.txt'.format(count), shell=True)
+    subprocess.call('find / -perm -4000 > setUid{}.txt'.format(count), shell=True)
 
 def CollectVarLog(logname, count): #wtmp, btmp, lastlog, xferlog, cron, secure, httpd/access_log, httpd/error_log
-    subprocess.call('cat /var/log/{} > {}/{}_{}.bin'.format(logname, logname, logname, count), shell=True)
-    subprocess.call('string {}/{}_{}.bin'.format(logname, logname, count), shell=True)
+    subprocess.call('cat /var/log/{} > {}_{}.bin'.format(logname, logname, count), shell=True)
+    subprocess.call('string {}_{}.bin'.format(logname, count), shell=True)
 
 def Gethistory():
     User_list = str(subprocess.check_output('grep /bin/bash /etc/passwd | cut -f1 -d:', shell=True),encoding="utf-8").split('\n')
@@ -42,15 +37,33 @@ def Gethistory():
         else:
             subprocess.call('cat /home/{}/.bash_history > {}_history.txt'.format(user, user), shell=True)
 
-def Who():
-    subprocess.call('who -a > who.txt')
+def GetNewInfo(command, fileName):
+    first_list = str(subprocess.check_output(command, shell=True), encoding="utf-8").split("\n")
+    Dup_check_list = []
+    while True:
+        check_new_list = str(subprocess.check_output(command, shell=True), encoding="utf-8").split("\n")
+        for item in check_new_list:
+            if item in first_list:
+                check_new_list.remove(item)
+        
+        for item in check_new_list:
+            with open(fileName, "a") as f:
+                if item in Dup_check_list or item == "":
+                    continue
+                else:
+                    f.write(item + "\n")
+                    Dup_check_list.append(item)
 
-def GetNetworkInfo(count):
-    subprocess.call('cat netstat -naop > network_{}'.format(count), shell=True)
+def GetWho():
+    GetNewInfo('who -a', "new_who.txt")
 
-def GetProcessInfo(count):
-    subprocess.call('cat ps -ef -naop > process_{}'.format(count), shell=True)
+def GetNetworkInfo():
+    GetNewInfo('netstat -nalp', "new_network.txt")
+                
+def GetProcessInfo():
+    GetNewInfo('ps -aux', "new_process.txt")
 
 if __name__ == "__main__":
     
+
     
