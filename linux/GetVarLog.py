@@ -29,18 +29,18 @@ def CollectHttpdLog(logname, count):
     
 if __name__ == "__main__":
     time_input = int(input("time cycle? : "))
-    # for i in range(1, 4):
-    #     CollectVarLog("wtmp", i)
-    #     CollectVarLog("btmp", i)
-    #     CollectVarLog("lastlog", i)
-    #     CollectVarLog("xferlog", i)
-    #     CollectVarLog("cron", i)
-    #     CollectVarLog("secure", i)
-    #     CollectVarLog("messages", i)
-    #     CollectHttpdLog("access_log", i)
-    #     CollectHttpdLog("error_log", i)
-    #     CheckSetUID(i)
-    #     time.sleep(time_input)
+    for i in range(1, 4):
+        CollectVarLog("wtmp", i)
+        CollectVarLog("btmp", i)
+        CollectVarLog("lastlog", i)
+        CollectVarLog("xferlog", i)
+        CollectVarLog("cron", i)
+        CollectVarLog("secure", i)
+        CollectVarLog("messages", i)
+        CollectHttpdLog("access_log", i)
+        CollectHttpdLog("error_log", i)
+        CheckSetUID(i)
+        time.sleep(time_input)
     
     Service_list = GetServiceList()
     if "mongodb" in Service_list:

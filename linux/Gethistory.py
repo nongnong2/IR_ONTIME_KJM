@@ -4,8 +4,8 @@ import os
 
 def Gethistory():
     User_list = str(subprocess.check_output('grep /bin/bash /etc/passwd | cut -f1 -d:', shell=True),encoding="utf-8").split('\n')
-    for user in User_list:
-        while True:
+    while True:
+        for user in User_list:
             if user == '':
                 pass
             elif user == 'root':
