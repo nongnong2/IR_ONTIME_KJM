@@ -27,6 +27,7 @@ if __name__ == "__main__":
     
     subprocess.call("netstat -nalp > /home/investigate/final_netsta.txt")
     subprocess.call("ps -aux > /home/investigate/final_process.txt")
+    subprocess.call("cp /var/spool/cron /home/investigate/")
 
 
         
